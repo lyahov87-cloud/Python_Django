@@ -40,7 +40,7 @@ class Product(models.Model):
 
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products', verbose_name="Категория")
     tags = models.ManyToManyField(Tag, blank=True, related_name='products', verbose_name="Теги")
-    image = models.ImageField(upload_to='products/', null=True, blank=True, verbose_name="Изображение товара")
+   #image = models.ImageField(upload_to='products/', null=True, blank=True, verbose_name="Изображение товара")
 
     def __str__(self):
         return self.title
@@ -55,4 +55,16 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.author} на {self.product.title}"
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images', verbose_name="Товар")
+    image = models.ImageField(upload_to='products/', verbose_name="Изображение")
+
+    class Meta:
+        verbose_name = "Изображение товара"
+        verbose_name = "Изображения товаров"
+
+    def __str__(self):
+        return f"Картинка для {self.product.title}"
 

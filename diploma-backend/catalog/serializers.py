@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Category, Tag, Product, Review
 
+
 # --- СЕРИАЛИЗАТОРЫ ДЛЯ ТЕГОВ И КАТЕГОРИЙ ---
 
 class TagSerializer(serializers.ModelSerializer):
@@ -40,9 +41,6 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
-    # Делаем поля гибкими, чтобы отсутствие данных от фронтенда не вызывало ошибку 400
-    author = serializers.CharField(required=False, allow_blank=True, default="Аноним")
-    email = serializers.EmailField(required=False, allow_blank=True, default="anonymous@example.com")
 
     class Meta:
         model = Review
@@ -51,7 +49,6 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 # --- СЕРИАЛИЗАТОРЫ ДЛЯ ТОВАРОВ ---
 
-# 1. Базовый сериализатор для списков (Каталог, Баннеры, Популярные)
 class ProductSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
@@ -59,20 +56,21 @@ class ProductSerializer(serializers.ModelSerializer):
     reviews = serializers.IntegerField(default=0, read_only=True)
     rating = serializers.FloatField(default=5.0, read_only=True)
 
+    # Отдаем оба варианта именования для совместимости Swagger + JS
+    freeDelivery = serializers.BooleanField(source='free_delivery', default=False)
+    free_delivery = serializers.BooleanField(default=False)
+
     class Meta:
         model = Product
         fields = [
             'id', 'category', 'price', 'count', 'date', 'title',
-            'description', 'free_delivery', 'images', 'tags', 'reviews', 'rating'
+            'description', 'freeDelivery', 'free_delivery', 'images', 'tags', 'reviews', 'rating'
         ]
 
     def get_images(self, obj):
-        if obj.image:
-            return [{"src": obj.image.url, "alt": obj.title}]
-        return [{"src": "", "alt": obj.title}]
+        return [{"src": img.image.url, "alt": obj.title} for img in obj.images.all()]
 
 
-# 2. Расширенный сериализатор для детальной страницы (с выводом списка отзывов)
 class ProductFullSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     tags = TagSerializer(many=True, read_only=True)
@@ -80,17 +78,24 @@ class ProductFullSerializer(serializers.ModelSerializer):
     reviews = ReviewSerializer(source='product_reviews', many=True, read_only=True)
     rating = serializers.SerializerMethodField()
 
+    # Совместимость полей доставки
+    freeDelivery = serializers.BooleanField(source='free_delivery', default=False)
+    free_delivery = serializers.BooleanField(default=False)
+
+    # Совместимость описаний по Swagger (строки 554 и 557)
+    description = serializers.CharField()
+    fullDescription = serializers.CharField(source='description')
+
     class Meta:
         model = Product
         fields = [
             'id', 'category', 'price', 'count', 'date', 'title',
-            'description', 'free_delivery', 'images', 'tags', 'reviews', 'rating'
+            'description', 'fullDescription', 'freeDelivery', 'free_delivery',
+            'images', 'tags', 'reviews', 'rating'
         ]
 
     def get_images(self, obj):
-        if obj.image:
-            return [{"src": obj.image.url, "alt": obj.title}]
-        return [{"src": "", "alt": obj.title}]
+        return [{"src": img.image.url, "alt": obj.title} for img in obj.images.all()]
 
     def get_rating(self, obj):
         reviews = obj.product_reviews.all()

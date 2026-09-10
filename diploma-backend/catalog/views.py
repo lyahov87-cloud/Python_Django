@@ -75,21 +75,22 @@ class ProductDetailView(APIView):
         return Response(serializer.data)
 
     def post(self, request, id):
-        # Находим товар, к которому пишется отзыв
         product = get_object_or_404(Product, id=id)
-
-        # Подменяем имя автора, если фронтенд прислал его в 'name'
         data = request.data.copy()
-        if 'name' in data and not data.get('author'):
-            data['author'] = data['name']
+
+        # Если поля пришили пустыми, подставляем дефолты
+        if not data.get('author'):
+            data['author'] = "Аноним"
+        if not data.get('email'):
+            data['email'] = "anonymous@example.com"
 
         serializer = ReviewSerializer(data=data)
 
         if serializer.is_valid():
             serializer.save(product=product)
-            # Возвращаем актуальный список всех отзывов к этому товару
             all_reviews = product.product_reviews.all()
             response_serializer = ReviewSerializer(all_reviews, many=True)
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

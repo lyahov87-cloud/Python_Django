@@ -1,0 +1,150 @@
+[
+{
+    "model": "catalog.tag",
+    "pk": 1,
+    "fields": {
+        "name": "Смартфоны"
+    }
+},
+{
+    "model": "catalog.tag",
+    "pk": 2,
+    "fields": {
+        "name": "Новинки"
+    }
+},
+{
+    "model": "catalog.tag",
+    "pk": 3,
+    "fields": {
+        "name": "Скидки"
+    }
+},
+{
+    "model": "catalog.category",
+    "pk": 2,
+    "fields": {
+        "title": "Электроника",
+        "parent": null,
+        "image": ""
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 1,
+    "fields": {
+        "title": "Нокиа",
+        "description": "Хороший телефон",
+        "price": "5000.00",
+        "count": 5,
+        "date": "2026-09-01T07:48:45.329Z",
+        "free_delivery": false,
+        "is_popular": true,
+        "is_limited": false,
+        "is_banner": true,
+        "category": 2,
+        "tags": []
+    }
+},
+{
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+        "title": "Айфон",
+        "description": "",
+        "price": "10000.00",
+        "count": 2,
+        "date": "2026-09-01T08:27:49.345Z",
+        "free_delivery": false,
+        "is_popular": false,
+        "is_limited": true,
+        "is_banner": false,
+        "category": 2,
+        "tags": []
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 1,
+    "fields": {
+        "product": 1,
+        "author": "",
+        "email": "",
+        "text": "укпуккпукпукп",
+        "rate": 5,
+        "date": "2026-09-01T09:03:16.655Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 2,
+    "fields": {
+        "product": 1,
+        "author": "",
+        "email": "",
+        "text": "Вроде получилось",
+        "rate": 5,
+        "date": "2026-09-01T09:03:44.223Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 3,
+    "fields": {
+        "product": 2,
+        "author": "",
+        "email": "",
+        "text": "ку ку",
+        "rate": 3,
+        "date": "2026-09-02T07:33:04.535Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 4,
+    "fields": {
+        "product": 1,
+        "author": "",
+        "email": "",
+        "text": "Привет",
+        "rate": 5,
+        "date": "2026-09-07T10:11:18.489Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 5,
+    "fields": {
+        "product": 1,
+        "author": "",
+        "email": "",
+        "text": "Привет 2",
+        "rate": 5,
+        "date": "2026-09-07T10:11:42.784Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 6,
+    "fields": {
+        "product": 2,
+        "author": "",
+        "email": "",
+        "text": "re",
+        "rate": 5,
+        "date": "2026-09-10T12:40:25.139Z"
+    }
+},
+{
+    "model": "catalog.review",
+    "pk": 7,
+    "fields": {
+        "product": 1,
+        "author": "",
+        "email": "",
+        "text": "ку",
+        "rate": 5,
+        "date": "2026-09-10T12:54:05.392Z"
+    }
+}
+]

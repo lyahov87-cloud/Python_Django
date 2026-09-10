@@ -1,0 +1,11 @@
+[
+{
+    "model": "users.profile",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "phone": "89536041439",
+        "avatar": "avatars/godzilla-6000x3375-18563.jpg"
+    }
+}
+]

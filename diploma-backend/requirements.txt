@@ -1,5 +1,7 @@
 asgiref==3.12.1
+diploma-frontend @ file:///B:/first_pyhon_project/python_django_diploma/diploma-frontend/dist/diploma-frontend-0.6.tar.gz#sha256=3a6b1203724b256946919b4d65b362b005ae6a9e1e93d8d765e96aa6a92764ac
 Django==6.1
+django-cleanup==9.0.0
 djangorestframework==3.18.0
 pillow==12.3.0
 sqlparse==0.6.0

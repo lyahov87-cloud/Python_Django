@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'users',
     'orders',
     'basket',
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
