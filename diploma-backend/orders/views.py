@@ -1,3 +1,5 @@
+from basket.models import BasketItem
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,41 +11,62 @@ from catalog.models import Product
 
 
 class OrdersView(APIView):
-    permission_classes = [IsAuthenticated]
+    # Разрешаем доступ всем, включая гостей, чтобы не было ошибки 403
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        # История заказов текущего пользователя
+        if not request.user.is_authenticated:
+            return Response([])
         orders = request.user.orders.all().order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        # Создаем заказ на основе товаров из сессионной корзины
+        # Забираем товары из корзины (она работает и для гостей, и для авторизованных)
         basket = request.session.get('basket', {})
+
+        # Если пользователь авторизован, проверим товары в его БД-корзине
+        if request.user.is_authenticated:
+            db_items = request.user.basket_items.all()
+            if db_items.exists():
+                basket = {str(item.product.id): item.count for item in db_items}
+
         if not basket:
             return Response({"error": "Корзина пуста"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 1. Создаем пустой черновик заказа
-        order = Order.objects.create(user=request.user)
+        # Создаем заказ. Если гость — временно оставляем user=None или привязываем к текущему, если вошел
+        if request.user.is_authenticated:
+            order = Order.objects.create(user=request.user)
+        else:
+            # Для гостя находим или создаем временного технического пользователя "guest",
+            # либо используем первого попавшегося админа, чтобы не падал ForeignKey,
+            # на шаге логина мы перезапишем это поле на реального юзера!
+            from django.contrib.auth.models import User
+            guest_user, _ = User.objects.get_or_create(username='anonymous_guest', is_active=False)
+            order = Order.objects.create(user=guest_user)
+
         total_cost = 0
-
-        # 2. Переносим товары из корзины в OrderItem
         for product_id, count in basket.items():
-            product = get_object_or_404(Product, id=product_id)
-            price = product.price
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                price=price,
-                count=count
-            )
-            total_cost += price * count
+            try:
+                product = Product.objects.get(id=product_id)
+                price = product.price
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    price=price,
+                    count=count
+                )
+                total_cost += price * count
+            except Product.DoesNotExist:
+                pass
 
-        # 3. Сохраняем финальную стоимость и фиксируем изменения
         order.total_cost = total_cost
         order.save()
 
-        # 4. Фронтенд ждет ответ в формате {"orderId": id}
+        # Сохраняем ID заказа в сессию гостя, чтобы связать его при авторизации
+        request.session['current_order_id'] = order.id
+        request.session.modified = True
+
         return Response({"orderId": order.id}, status=status.HTTP_201_CREATED)
 
 
@@ -95,5 +118,12 @@ class PaymentView(APIView):
                 product.count = 0  # Если на складе почему-то было меньше, сбрасываем в 0
             product.save()
 
-        return Response(status=status.HTTP_200_OK)
+        # ДОБАВЛЯЕМ ПОЛНУЮ ОЧИСТКУ КОРЗИНЫ В БАЗЕ ДАННЫХ ---
+        # Удаляем все товары текущего пользователя из таблицы BasketItem
+        BasketItem.objects.filter(user=request.user).delete()
 
+        # На всякий случай очищаем и сессионную корзину гостя
+        request.session['basket'] = {}
+        request.session.modified = True
+
+        return Response(status=status.HTTP_200_OK)

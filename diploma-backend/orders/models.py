@@ -11,7 +11,8 @@ class Order(models.Model):
         ('delivered', 'Доставлен'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders', verbose_name="Покупатель")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='orders',
+                             verbose_name="Покупатель")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     # Данные доставки (заполняются на пошаговой форме)

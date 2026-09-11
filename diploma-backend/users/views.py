@@ -13,7 +13,7 @@ from .serializers import ProfileSerializer
 
 
 class SignInView(APIView):
-    def post(self, request):
+    def post(self, request, orders=None):
         # 1. Пробуем достать данные из JSON (через request.data)
         username = None
         password = None
@@ -49,6 +49,15 @@ class SignInView(APIView):
 
         if user is not None:
             login(request, user)
+            current_order_id = request.session.get('current_order_id')
+            if current_order_id:
+                from orders.models import Order
+                try:
+                    order = Order.objects.get(id=current_order_id)
+                    order.user = user  # Переписываем заказ с анонима на вошедшего юзера
+                    order.save()
+                except Order.DoesNotExist:
+                    pass
             session_basket = request.session.get('basket', {})
             if session_basket:
                 for product_id, count in session_basket.items():
