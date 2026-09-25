@@ -1,1 +1,3 @@
-diploma-frontend/* linguist-vendored
+* linguist-detectable=false
+*.py linguist-detectable=true
+diploma-backend/**/* linguist-detectable=true
